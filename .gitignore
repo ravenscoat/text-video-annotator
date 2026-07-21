@@ -11,3 +11,5 @@ vendor/
 *.mp4
 *.mov
 *.avi
+*.egg-info/
+python-*.exe
