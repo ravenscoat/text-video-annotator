@@ -95,6 +95,8 @@ $env:HF_HUB_OFFLINE='1'; $env:TRANSFORMERS_OFFLINE='1'
 
 A one-expression smoke run passed with region Jaccard `0.8328`, boundary F `0.2169`, and recall@IoU 0.50 `0.9938`; these are diagnostic metrics, not official MeViS leaderboard results.
 
+MeViS batch 1 completed (10 expression cases across 2 videos): region Jaccard `0.6514`, boundary F `0.4161`, recall@IoU 0.50 `0.7621`, 1,163 false-positive masks, 99 false-negative masks, and track fragmentation `16`. Results are in `outputs\\mevis_eval\\batch_001\\metrics.json`.
+
 ### Referring-video benchmark order
 
 We will use **Ref-DAVIS17 first** for a fast local phrase-segmentation test, then use **MeViS** for a larger language-guided video benchmark with motion expressions. The MeViS diagnostic target is **20 videos**. Refer-YouTube-VOS is not required because its validation data currently depends on the inaccessible legacy CodaLab download workflow.
