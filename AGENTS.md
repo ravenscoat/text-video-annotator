@@ -7,7 +7,7 @@ Before taking any action in this repository, read `NEXT_STEPS.md` completely and
 Important constraints:
 
 - Continue from the documented working state; do not reinstall Python, CUDA, PyTorch, Grounding DINO, Transformers, or SAM 2.
-- The immediate milestone is the LVIS 12-image evaluation described in `NEXT_STEPS.md`.
+- The LVIS, LV-VIS, Ref-DAVIS17, and first 50 MeViS diagnostic cases are complete. The active milestone is the temporal multi-object upgrade in `TEMPORAL_MULTI_OBJECT_PLAN.md`.
 - Fix the official COCO image URL handling without disabling TLS certificate verification.
 - Use the existing lightweight model adapters and keep inference within the documented 8 GB VRAM limits.
 - Run the specified acceptance checks and real evaluation before claiming completion.
@@ -15,3 +15,5 @@ Important constraints:
 - Use native Windows PowerShell syntax. A backtick copied as a standalone pip argument is invalid.
 
 If actual project state differs from `NEXT_STEPS.md`, inspect the files and test evidence, update the handoff with the verified state, and continue from the first incomplete acceptance criterion.
+
+Before implementing the active milestone, read `TEMPORAL_MULTI_OBJECT_PLAN.md` completely. Do not continue the remaining MeViS batches until its A/B evaluation gate is reached.

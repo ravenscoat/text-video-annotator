@@ -1,5 +1,9 @@
 # Next AI Handoff: LVIS Evaluation, Then Video Benchmarks
 
+## Current Priority Override
+
+Read `TEMPORAL_MULTI_OBJECT_PLAN.md` and treat it as the active implementation plan. Pause further MeViS batches after the first 50 expression cases. Implement category-union multi-object prompts, real periodic redetection, stable IDs, and temporal track selection; then rerun the same 50 cases behind the documented A/B gate.
+
 This file is the source of truth for the next implementation steps. Read it completely before changing the project. Do not restart setup or replace the working model stack.
 
 ## Goal
