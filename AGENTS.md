@@ -1,5 +1,7 @@
 # Instructions for Coding Agents
 
+Canonical project root: `D:\work\segment anything`. Work from this directory. The former OneDrive project copy has been moved; do not create new edits in the old path.
+
 Before taking any action in this repository, read `NEXT_STEPS.md` completely and treat it as the current source of truth.
 
 Important constraints:

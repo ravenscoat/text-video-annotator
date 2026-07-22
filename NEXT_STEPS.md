@@ -15,7 +15,7 @@ The immediate task is **LVIS image-subset evaluation**. After that passes, add a
 
 ## Known Working State — Do Not Repeat Setup
 
-- Workspace: `C:\Users\quandale dingle UwU\OneDrive\Documents\segment anything`
+- Workspace: `D:\work\segment anything`
 - GitHub repository: `https://github.com/ravenscoat/text-video-annotator`
 - Use native Windows PowerShell commands. Do not use Bash line continuation syntax.
 - Virtual environment: `.venv`
