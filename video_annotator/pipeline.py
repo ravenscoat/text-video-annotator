@@ -10,6 +10,7 @@ from .detector import GroundingDinoDetector
 from .exporters import JsonExporter, save_masks
 from .identity import TrackManager
 from .prompts import parse_prompt
+from .referring import select_tracks
 from .render import render
 from .tracker import Sam2ImageSegmenter, Sam2VideoTracker
 from .types import AnnotationResult
@@ -70,6 +71,16 @@ def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None
                     # five-argument adapter signature.
                     detections = detector.detect(first_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects)
                 detections = track_manager.update(detections, frame_index)
+                selected = {}
+                if prompt_spec.mode == "referring":
+                    selected = {
+                        item.track_id: item
+                        for item in select_tracks(
+                            track_manager.tracks.values(),
+                            prompt_spec.motion_text or prompt_spec.raw,
+                            frame_count=info.frame_count,
+                        )
+                    }
                 next_detection_frame = frame_index + config.redetect_every
                 if not detections:
                     for local_offset, (original_bgr, _) in enumerate(window):
@@ -92,11 +103,19 @@ def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None
                     local_to_global = {index + 1: detections[index].track_id for index in range(len(detections))}
                     for output_detection in output_detections:
                         output_detection.track_id = local_to_global.get(output_detection.track_id, output_detection.track_id)
+                        if prompt_spec.mode == "referring":
+                            selection = selected.get(output_detection.track_id)
+                            if selection is None:
+                                output_detection.track_id = None
+                            else:
+                                output_detection.selection_score = selection.score
+                                output_detection.selection_reasons = selection.reasons
                         if output_detection.mask is not None:
                             output_detection.mask = cv2.resize(output_detection.mask.astype(np.uint8), (original_bgr.shape[1], original_bgr.shape[0]), interpolation=cv2.INTER_NEAREST).astype(bool)
                             ys, xs = np.where(output_detection.mask)
                             if len(xs):
                                 output_detection.box_xyxy = (float(xs.min()), float(ys.min()), float(xs.max() + 1), float(ys.max() + 1))
+                    output_detections = [item for item in output_detections if item.track_id is not None]
                     writer.write(render(original_bgr, output_detections))
                     if config.export_masks:
                         save_masks(config.export_masks, current_index, output_detections)

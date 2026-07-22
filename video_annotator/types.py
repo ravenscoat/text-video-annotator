@@ -11,6 +11,8 @@ class Detection:
     score: float
     mask: np.ndarray | None = None
     track_id: int | None = None
+    selection_score: float | None = None
+    selection_reasons: tuple[str, ...] = ()
 
 
 @dataclass

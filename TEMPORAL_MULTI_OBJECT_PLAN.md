@@ -377,6 +377,8 @@ Requirements:
 
 This rule-based scorer is a baseline. Do not claim it solves unrestricted natural-language motion reasoning.
 
+Current implementation status: `motion.py` and `referring.py` provide CPU-side features, intent parsing, explicit object-ID selection, multi-clause selection, and explainable scores. `pipeline.py` now filters referring-mode rendered/exported detections by the selected global track IDs and writes `selection_score`/`selection_reasons` into JSON. Real benchmark validation remains required.
+
 ### Task 7: Optional motion-aware tracking experiment
 
 Only after Tasks 1-6 pass, evaluate whether a Kalman box prior inspired by SAMURAI improves fragmentation. Do not replace the working SAM 2 package or install a second incompatible model stack.

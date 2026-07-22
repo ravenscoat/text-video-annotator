@@ -6,6 +6,9 @@ import numpy as np
 
 def _json_object(detection):
     item = {"track_id": detection.track_id, "label": detection.label, "score": detection.score, "bbox_xyxy": list(detection.box_xyxy)}
+    if detection.selection_score is not None:
+        item["selection_score"] = detection.selection_score
+        item["selection_reasons"] = list(detection.selection_reasons)
     if detection.mask is not None:
         ys, xs = np.where(detection.mask)
         item["mask_area"] = int(len(xs))
