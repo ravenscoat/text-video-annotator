@@ -86,7 +86,7 @@ This manifest is the input for the upcoming phrase-aware video evaluator, which 
 
 ### Referring-video benchmark order
 
-We will use **Ref-DAVIS17 first** for a fast local phrase-segmentation test, then use **MeViS** for a larger language-guided video benchmark with motion expressions. Refer-YouTube-VOS is not required because its validation data currently depends on the inaccessible legacy CodaLab download workflow.
+We will use **Ref-DAVIS17 first** for a fast local phrase-segmentation test, then use **MeViS** for a larger language-guided video benchmark with motion expressions. The MeViS diagnostic target is **20 videos**. Refer-YouTube-VOS is not required because its validation data currently depends on the inaccessible legacy CodaLab download workflow.
 
 ### Ref-DAVIS17 local setup
 

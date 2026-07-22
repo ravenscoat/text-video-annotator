@@ -113,7 +113,7 @@ data\\ref_davis17\\valid\\meta_expressions.json
 
 After downloading, create the ten-expression manifest with `scripts\\prepare_refdavis_manifest.py`. The next implementation task is the phrase evaluator using Grounding DINO + SAM 2 propagation and region Jaccard/boundary-F metrics.
 
-The phrase evaluator is now implemented in `scripts/evaluate_refdavis_subset.py`. It decodes DAVIS palette PNGs with Pillow, streams frames through the existing chunked pipeline, and reports region Jaccard, boundary F, recall, false positives/negatives, and track fragmentation. A one-case smoke run passed at long side 512; run the ten-case command from the README next.
+The phrase evaluator is now implemented in `scripts/evaluate_refdavis_subset.py`. It decodes DAVIS palette PNGs with Pillow, streams frames through the existing chunked pipeline, and reports region Jaccard, boundary F, recall, false positives/negatives, and track fragmentation. The ten-case run passed at long side 512. The MeViS follow-up evaluation target is now **20 videos**.
 
 ### Refer-YouTube-VOS progress
 
