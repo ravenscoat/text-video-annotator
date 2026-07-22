@@ -8,12 +8,19 @@ import numpy as np
 from .config import AnnotationConfig
 from .detector import GroundingDinoDetector
 from .exporters import JsonExporter, save_masks
-from .identity import associate
+from .identity import TrackManager
 from .prompts import parse_prompt
 from .render import render
 from .tracker import Sam2ImageSegmenter, Sam2VideoTracker
 from .types import AnnotationResult
 from .video_io import is_video, iter_video_chunks, make_writer, probe
+
+
+def redetection_indices(frame_count: int, redetect_every: int) -> list[int]:
+    """Return global frame indices at which detector refreshes are required."""
+    if frame_count < 1 or redetect_every < 1:
+        return []
+    return list(range(0, frame_count, redetect_every))
 
 
 def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None, video_tracker=None) -> AnnotationResult:
@@ -27,7 +34,7 @@ def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None
     if not info.is_video:
         image = cv2.imread(str(config.input_path), cv2.IMREAD_COLOR)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            detections = detector.detect(image_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects, prompt_spec.targets, config.max_objects_per_target)
+        detections = detector.detect(image_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects, prompt_spec.targets, config.max_objects_per_target)
         segmenter = image_segmenter or Sam2ImageSegmenter(device=config.device)
         detections = segmenter.segment(image_rgb, detections)
         output = render(image, detections)
@@ -42,46 +49,61 @@ def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None
 
     writer = make_writer(config.output_path, info)
     tracker = video_tracker or Sam2VideoTracker(device=config.device)
-    previous, next_id, count, found = [], 1, 0, 0
+    track_manager = TrackManager()
+    count, found = 0, 0
+    next_detection_frame = 0
     try:
         for start, chunk in iter_video_chunks(config.input_path, config.chunk_frames, config.long_side):
-            first_rgb = chunk[0][1]
-            detections = detector.detect(first_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects, prompt_spec.targets, config.max_objects_per_target)
-            detections, next_id = associate(previous, detections, next_id)
-            previous = detections
-            if not detections:
-                for offset, (original_bgr, _) in enumerate(chunk):
-                    frame_index = start + offset
-                    writer.write(original_bgr)
-                    if exporter:
-                        exporter.add(frame_index, frame_index / info.fps, [])
-                    count += 1
-                continue
-            found += len(detections)
-            with tempfile.TemporaryDirectory(prefix="sam2_chunk_") as temp_dir:
-                frame_dir = Path(temp_dir)
-                for offset, (_, rgb) in enumerate(chunk):
-                    # SAM 2's video loader expects numbered image files.
-                    cv2.imwrite(str(frame_dir / f"{offset:06d}.jpg"), cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))
-                propagated = {frame_idx: frame_detections for frame_idx, frame_detections in tracker.propagate(frame_dir, detections)}
-            for offset, (original_bgr, rgb) in enumerate(chunk):
+            offset = 0
+            while offset < len(chunk):
                 frame_index = start + offset
-                output_detections = propagated.get(offset, [])
-                local_to_global = {index + 1: detections[index].track_id for index in range(len(detections))}
-                for output_detection in output_detections:
-                    output_detection.track_id = local_to_global.get(output_detection.track_id, output_detection.track_id)
-                    if output_detection.mask is not None:
-                        # SAM returns a mask in inference resolution; export at source resolution.
-                        output_detection.mask = cv2.resize(output_detection.mask.astype(np.uint8), (original_bgr.shape[1], original_bgr.shape[0]), interpolation=cv2.INTER_NEAREST).astype(bool)
-                        ys, xs = np.where(output_detection.mask)
-                        if len(xs):
-                            output_detection.box_xyxy = (float(xs.min()), float(ys.min()), float(xs.max() + 1), float(ys.max() + 1))
-                writer.write(render(original_bgr, output_detections))
-                if config.export_masks:
-                    save_masks(config.export_masks, frame_index, output_detections)
-                if exporter:
-                    exporter.add(frame_index, frame_index / info.fps, output_detections)
-                count += 1
+                window_end = min(offset + config.redetect_every, len(chunk))
+                window = chunk[offset:window_end]
+                first_rgb = window[0][1]
+                # Each window begins with a detector refresh. With normal
+                # settings (redetect_every <= chunk_frames), these are exact
+                # global indices 0, N, 2N, ...; TrackManager preserves IDs.
+                try:
+                    detections = detector.detect(first_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects, prompt_spec.targets, config.max_objects_per_target)
+                except TypeError:
+                    # Compatibility for user-provided detectors using the old
+                    # five-argument adapter signature.
+                    detections = detector.detect(first_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects)
+                detections = track_manager.update(detections, frame_index)
+                next_detection_frame = frame_index + config.redetect_every
+                if not detections:
+                    for local_offset, (original_bgr, _) in enumerate(window):
+                        current_index = frame_index + local_offset
+                        writer.write(original_bgr)
+                        if exporter:
+                            exporter.add(current_index, current_index / info.fps, [])
+                        count += 1
+                    offset = window_end
+                    continue
+                found += len(detections)
+                with tempfile.TemporaryDirectory(prefix="sam2_window_") as temp_dir:
+                    frame_dir = Path(temp_dir)
+                    for local_offset, (_, rgb) in enumerate(window):
+                        cv2.imwrite(str(frame_dir / f"{local_offset:06d}.jpg"), cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))
+                    propagated = {frame_idx: frame_detections for frame_idx, frame_detections in tracker.propagate(frame_dir, detections)}
+                for local_offset, (original_bgr, _) in enumerate(window):
+                    current_index = frame_index + local_offset
+                    output_detections = propagated.get(local_offset, [])
+                    local_to_global = {index + 1: detections[index].track_id for index in range(len(detections))}
+                    for output_detection in output_detections:
+                        output_detection.track_id = local_to_global.get(output_detection.track_id, output_detection.track_id)
+                        if output_detection.mask is not None:
+                            output_detection.mask = cv2.resize(output_detection.mask.astype(np.uint8), (original_bgr.shape[1], original_bgr.shape[0]), interpolation=cv2.INTER_NEAREST).astype(bool)
+                            ys, xs = np.where(output_detection.mask)
+                            if len(xs):
+                                output_detection.box_xyxy = (float(xs.min()), float(ys.min()), float(xs.max() + 1), float(ys.max() + 1))
+                    writer.write(render(original_bgr, output_detections))
+                    if config.export_masks:
+                        save_masks(config.export_masks, current_index, output_detections)
+                    if exporter:
+                        exporter.add(current_index, current_index / info.fps, output_detections)
+                    count += 1
+                offset = window_end
     finally:
         writer.release()
     if exporter:
