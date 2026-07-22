@@ -9,8 +9,11 @@ from pathlib import Path
 def _find_dir(root: Path, name: str, video_id: str) -> Path:
     candidates = (
         root / name / video_id,
+        root / name / "480p" / video_id,
         root / "valid" / name / video_id,
+        root / "valid" / name / "480p" / video_id,
         root / "train" / name / video_id,
+        root / "train" / name / "480p" / video_id,
         root / video_id,
     )
     return next((path for path in candidates if path.is_dir()), candidates[0])
