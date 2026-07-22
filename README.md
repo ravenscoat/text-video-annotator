@@ -83,3 +83,7 @@ Prepare phrase cases:
 ```
 
 This manifest is the input for the upcoming phrase-aware video evaluator, which will compare the referred-object masks using region Jaccard (J) and boundary F metrics.
+
+### Referring-video benchmark order
+
+We will use **Ref-DAVIS17 first** for a fast local phrase-segmentation test, then use **MeViS** for a larger language-guided video benchmark with motion expressions. Refer-YouTube-VOS remains optional because its validation data currently depends on the legacy CodaLab download workflow.

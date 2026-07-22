@@ -91,7 +91,13 @@ The remaining video milestone is to obtain the authorized LV-VIS validation arch
 - Aggregate metrics: mean frame mask IoU `0.8717`, recall@IoU 0.50 `1.0000`, 232 false-positive masks, 0 false-negative masks, and 0 track fragmentation.
 - The moved checkout now imports SAM 2 from the local `vendor/sam2` fallback if its old editable-install path is stale.
 
-Do not rerun the full 10-case benchmark unless evaluator code or thresholds change. The next product milestone is a referring-expression benchmark (Refer-YouTube-VOS), followed by the web API/UI layer.
+Do not rerun the full 10-case benchmark unless evaluator code or thresholds change. The next product milestone is a referring-expression benchmark, followed by the web API/UI layer.
+
+### Updated referring-video benchmark order
+
+1. **Ref-DAVIS17 first** — use it as the fast local phrase-segmentation test because it is small and practical to validate locally.
+2. **MeViS afterward** — use it as the larger language-guided video benchmark, including motion expressions.
+3. Keep Refer-YouTube-VOS as an optional later benchmark because its current validation-download workflow depends on the legacy CodaLab competition server.
 
 ### Refer-YouTube-VOS progress
 
