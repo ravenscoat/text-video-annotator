@@ -9,6 +9,7 @@ from .config import AnnotationConfig
 from .detector import GroundingDinoDetector
 from .exporters import JsonExporter, save_masks
 from .identity import associate
+from .prompts import parse_prompt
 from .render import render
 from .tracker import Sam2ImageSegmenter, Sam2VideoTracker
 from .types import AnnotationResult
@@ -17,14 +18,16 @@ from .video_io import is_video, iter_video_chunks, make_writer, probe
 
 def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None, video_tracker=None) -> AnnotationResult:
     config.validate()
+    prompt_spec = parse_prompt(config.prompt, config.prompt_mode, config.targets)
+    detector_prompt = prompt_spec.detector_prompt if prompt_spec.mode == "category_union" else prompt_spec.raw
     info = probe(config.input_path)
     config.output_path.parent.mkdir(parents=True, exist_ok=True)
     detector = detector or GroundingDinoDetector(device=config.device)
-    exporter = JsonExporter(config.export_json, config.prompt, info) if config.export_json else None
+    exporter = JsonExporter(config.export_json, config.prompt or detector_prompt, info) if config.export_json else None
     if not info.is_video:
         image = cv2.imread(str(config.input_path), cv2.IMREAD_COLOR)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        detections = detector.detect(image_rgb, config.prompt, config.box_threshold, config.text_threshold, config.max_objects)
+        detections = detector.detect(image_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects)
         segmenter = image_segmenter or Sam2ImageSegmenter(device=config.device)
         detections = segmenter.segment(image_rgb, detections)
         output = render(image, detections)
@@ -43,7 +46,7 @@ def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None
     try:
         for start, chunk in iter_video_chunks(config.input_path, config.chunk_frames, config.long_side):
             first_rgb = chunk[0][1]
-            detections = detector.detect(first_rgb, config.prompt, config.box_threshold, config.text_threshold, config.max_objects)
+            detections = detector.detect(first_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects)
             detections, next_id = associate(previous, detections, next_id)
             previous = detections
             if not detections:

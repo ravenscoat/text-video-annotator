@@ -18,11 +18,12 @@ class AnnotationConfig:
     max_objects: int = 10
     device: str = "cuda"
     keep_audio: bool = False
+    targets: tuple[str, ...] | None = None
 
     def validate(self) -> None:
         if not self.input_path.exists():
             raise FileNotFoundError(f"Input does not exist: {self.input_path}")
-        if not self.prompt.strip():
+        if not self.prompt.strip() and not self.targets:
             raise ValueError("Prompt cannot be empty")
         if self.prompt_mode not in {"category", "referring"}:
             raise ValueError("prompt_mode must be 'category' or 'referring'")
