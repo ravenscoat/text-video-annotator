@@ -4,7 +4,7 @@
 
 Read `TEMPORAL_MULTI_OBJECT_PLAN.md` and treat it as the active implementation plan. Pause further MeViS batches after the first 50 expression cases. Implement category-union multi-object prompts, real periodic redetection, stable IDs, and temporal track selection; then rerun the same 50 cases behind the documented A/B gate.
 
-Tasks 1-4 are complete: prompts, class-aware detector filtering, persistent multi-object IDs, and real redetection windows are implemented. The pipeline now refreshes detection at configured window boundaries and preserves global IDs through `TrackManager`; the existing 8-frame real-model smoke test passed (`objects_found=1`, 8 frames). Targeted model-free tests pass (`17 passed`). Task 5 is next: category-union dog/horse acceptance with cat exclusion.
+Tasks 1-4 are complete: prompts, class-aware detector filtering, persistent multi-object IDs, and real redetection windows are implemented. The pipeline now refreshes detection at configured window boundaries and preserves global IDs through `TrackManager`; the existing 8-frame real-model smoke test passed (`objects_found=1`, 8 frames). Targeted model-free tests pass (`17 passed`). Task 5 model-free category-union checks now also pass (`11 passed` for filtering, late-object IDs, tracking, and redetection). The remaining Task 5 evidence is a real dog+horse+cat video; the local LV-VIS clips do not contain that three-class fixture, and the current OpenCV build cannot create a fresh MP4 writer, so no semantic end-to-end claim is made yet.
 
 This file is the source of truth for the next implementation steps. Read it completely before changing the project. Do not restart setup or replace the working model stack.
 
