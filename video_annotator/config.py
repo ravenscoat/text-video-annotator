@@ -16,6 +16,7 @@ class AnnotationConfig:
     box_threshold: float = 0.30
     text_threshold: float = 0.25
     max_objects: int = 10
+    max_objects_per_target: int = 5
     device: str = "cuda"
     keep_audio: bool = False
     targets: tuple[str, ...] | None = None
@@ -33,5 +34,7 @@ class AnnotationConfig:
             raise ValueError("chunk_frames and redetect_every must be positive")
         if self.max_objects < 1:
             raise ValueError("max_objects must be positive")
+        if self.max_objects_per_target < 1:
+            raise ValueError("max_objects_per_target must be positive")
         if self.input_path.resolve() == self.output_path.resolve():
             raise ValueError("Output path must differ from input path")

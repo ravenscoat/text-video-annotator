@@ -27,7 +27,7 @@ def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None
     if not info.is_video:
         image = cv2.imread(str(config.input_path), cv2.IMREAD_COLOR)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        detections = detector.detect(image_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects)
+            detections = detector.detect(image_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects, prompt_spec.targets, config.max_objects_per_target)
         segmenter = image_segmenter or Sam2ImageSegmenter(device=config.device)
         detections = segmenter.segment(image_rgb, detections)
         output = render(image, detections)
@@ -46,7 +46,7 @@ def annotate_media(config: AnnotationConfig, detector=None, image_segmenter=None
     try:
         for start, chunk in iter_video_chunks(config.input_path, config.chunk_frames, config.long_side):
             first_rgb = chunk[0][1]
-            detections = detector.detect(first_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects)
+            detections = detector.detect(first_rgb, detector_prompt, config.box_threshold, config.text_threshold, config.max_objects, prompt_spec.targets, config.max_objects_per_target)
             detections, next_id = associate(previous, detections, next_id)
             previous = detections
             if not detections:

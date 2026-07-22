@@ -4,7 +4,7 @@
 
 Read `TEMPORAL_MULTI_OBJECT_PLAN.md` and treat it as the active implementation plan. Pause further MeViS batches after the first 50 expression cases. Implement category-union multi-object prompts, real periodic redetection, stable IDs, and temporal track selection; then rerun the same 50 cases behind the documented A/B gate.
 
-Task 1 is complete: `video_annotator/prompts.py` now normalizes category unions and explicit repeated targets, the CLI accepts repeatable `--target`, and the pipeline passes the canonical period-separated prompt to the detector. Targeted prompt/core tests pass (`7 passed`). Task 2 is next: class-aware Grounding DINO postprocessing and filtering.
+Tasks 1-2 are complete: `video_annotator/prompts.py` normalizes category unions and explicit repeated targets; the CLI accepts repeatable `--target`; and class-aware Grounding DINO postprocessing now filters unrequested labels, applies per-class NMS, and preserves multiple requested classes under the global cap. Targeted prompt/detector/core tests pass (`11 passed`). Task 3 is next: stable multi-object TrackManager association.
 
 This file is the source of truth for the next implementation steps. Read it completely before changing the project. Do not restart setup or replace the working model stack.
 
