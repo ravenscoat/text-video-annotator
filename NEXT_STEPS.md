@@ -74,7 +74,14 @@ That rewrite must be removed. First try the original `image["coco_url"]` unchang
 - Preview masks for air conditioner, banana, and bucket were visually inspected and aligned with the visible objects.
 - Fast compile and existing tests pass: `2 passed`.
 
-Do not repeat Steps 1–3 unless their implementation changes. The next incomplete work is the additional evaluator unit-test coverage and README results update.
+Do not repeat Steps 1–3 unless their implementation changes. LV-VIS video preparation and evaluation code is now present:
+
+- `scripts/prepare_video_manifest.py` selects deterministic category-balanced cases from local LV-VIS annotations.
+- `scripts/evaluate_lvvis_subset.py` runs the existing chunked pipeline and reports temporal mask IoU, recall, false positives/negatives, and track fragmentation.
+- `video_annotator/video_metrics.py` contains the tested matching and fragmentation metrics.
+- The full fast suite passes: `10 passed`.
+
+The remaining video milestone is to obtain the authorized LV-VIS validation archive locally, generate a manifest, run the real evaluator, inspect previews, and record the results. Do not download or commit the dataset automatically.
 
 ## Step 1 — Repair and Complete the LVIS Subset Download
 

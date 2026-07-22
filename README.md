@@ -41,3 +41,23 @@ $env:TRANSFORMERS_OFFLINE='1'
 ```
 
 The diagnostic result was mean mask IoU `0.5694`, recall at IoU 0.50 `0.4839`, and precision at IoU 0.50 `0.4688`. These numbers are from a 12-case diagnostic subset and are not official LVIS AP. Per-case results and previews are written to `outputs/lvis_eval/`.
+
+## LV-VIS video evaluation
+
+The next-stage evaluator is implemented in [evaluate_lvvis_subset.py](scripts/evaluate_lvvis_subset.py). Download the validation video archive and `val_instances.json` from the [official LV-VIS repository](https://github.com/haochenheheda/LVVIS), extract them locally under `data/lv_vis/raw`, and do not add the media or annotations to Git. LV-VIS is CC BY-NC-SA 4.0 and released for non-commercial research.
+
+Prepare a small, category-balanced manifest after the files are present:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\prepare_video_manifest.py --annotations data\lv_vis\raw\val_instances.json --dataset-root data\lv_vis\raw --output data\lv_vis\manifests\general_eval.json --max-items 10
+```
+
+Run the chunked video evaluator offline:
+
+```powershell
+$env:HF_HUB_OFFLINE='1'
+$env:TRANSFORMERS_OFFLINE='1'
+.\.venv\Scripts\python.exe scripts\evaluate_lvvis_subset.py --manifest data\lv_vis\manifests\general_eval.json --output outputs\lvvis_eval --long-side 768 --chunk-frames 30
+```
+
+It reports per-frame mask IoU, recall at IoU 0.50, false-positive/negative masks, and track fragmentation. These are diagnostic subset metrics, not official LV-VIS AP.
