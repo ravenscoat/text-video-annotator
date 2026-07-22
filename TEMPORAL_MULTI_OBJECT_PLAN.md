@@ -414,6 +414,10 @@ Gate for continuing the remaining MeViS evaluation:
 
 If the gate fails, report the failure and inspect candidate-selection diagnostics. Do not hide poor results by changing the evaluation subset.
 
+### Verified first-50 A/B result
+
+The exact first 50 expressions were rerun after integrating referring selection. Baseline versus upgraded: region Jaccard `0.3460 -> 0.3436`, boundary F `0.2457 -> 0.2452`, recall@0.50 `0.3934 -> 0.3840`, false-positive masks `3209 -> 2758` (-14.1%), false-negative masks `1002 -> 1016`, and fragmentation `61 -> 53` (-13.1%). The gate failed: the Jaccard target was not met and the false-positive reduction was below 25%. Remaining MeViS batches are paused. The next task is to inspect selection diagnostics and improve candidate/action scoring before another A/B run.
+
 ## Small-Model Work Instructions
 
 Send one task at a time to a smaller coding model. Include this exact preamble:

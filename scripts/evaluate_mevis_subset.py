@@ -49,7 +49,7 @@ def evaluate_case(case: dict, mask_dict: dict, detector, tracker, output_root: P
             writer.write(image)
     finally: writer.release()
     mask_dir = output_root / f"masks_{stem}"
-    config = AnnotationConfig(input_video, case["prompt"], output_root / f"annotated_{stem}.mp4", export_json=output_root / f"predictions_{stem}.json", export_masks=mask_dir, long_side=long_side, chunk_frames=chunk_frames, device=device)
+    config = AnnotationConfig(input_video, case["prompt"], output_root / f"annotated_{stem}.mp4", export_json=output_root / f"predictions_{stem}.json", export_masks=mask_dir, prompt_mode="referring", long_side=long_side, chunk_frames=chunk_frames, device=device)
     result = annotate_media(config, detector=detector, video_tracker=tracker)
     predictions, prediction_ids = read_prediction_masks(mask_dir, len(frames))
     frame_results = []; assignments = []; ious = []; boundaries = []; tp = fp = fn = 0
