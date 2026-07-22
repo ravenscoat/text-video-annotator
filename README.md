@@ -105,3 +105,12 @@ Create a deterministic ten-expression manifest:
 ```powershell
 .\\.venv\\Scripts\\python.exe scripts\\prepare_refdavis_manifest.py --meta data\\ref_davis17\\valid\\meta_expressions.json --split-root data\\ref_davis17\\valid --output data\\ref_davis17\\manifests\\general_eval.json --max-items 10
 ```
+
+Run a phrase-segmentation smoke evaluation (the full ten-case run uses the same command):
+
+```powershell
+$env:HF_HUB_OFFLINE='1'; $env:TRANSFORMERS_OFFLINE='1'
+.\\.venv\\Scripts\\python.exe scripts\\evaluate_refdavis_subset.py --manifest data\\ref_davis17\\manifests\\general_eval.json --output outputs\\refdavis_eval --long-side 512 --chunk-frames 30
+```
+
+The one-case smoke run completed on the RTX 5060 with region Jaccard `0.6809`, boundary F `0.5801`, recall@0.50 `1.0000`, zero false positives/negatives, and zero track fragmentation. This is a diagnostic subset result, not the official Ref-DAVIS17 leaderboard J&F.
