@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 import numpy as np
 
 from .types import Detection
@@ -14,8 +15,15 @@ class Sam2ImageSegmenter:
     def load(self):
         try:
             from sam2.sam2_image_predictor import SAM2ImagePredictor
-        except ImportError as exc:
-            raise RuntimeError("Install the official SAM 2 package to use segmentation") from exc
+        except ImportError:
+            # Editable installs can retain the old absolute path after the
+            # repository is moved. Prefer the vendored source in this checkout.
+            local_vendor = Path(__file__).resolve().parents[1] / "vendor" / "sam2"
+            if local_vendor.is_dir():
+                sys.path.insert(0, str(local_vendor))
+                from sam2.sam2_image_predictor import SAM2ImagePredictor
+            else:
+                raise RuntimeError("Install the official SAM 2 package to use segmentation")
         self.predictor = SAM2ImagePredictor.from_pretrained(self.model_id)
         self.predictor.model.to(self.device)
 
@@ -38,8 +46,13 @@ class Sam2VideoTracker:
     def load(self):
         try:
             from sam2.sam2_video_predictor import SAM2VideoPredictor
-        except ImportError as exc:
-            raise RuntimeError("Install the official SAM 2 package to use video tracking") from exc
+        except ImportError:
+            local_vendor = Path(__file__).resolve().parents[1] / "vendor" / "sam2"
+            if local_vendor.is_dir():
+                sys.path.insert(0, str(local_vendor))
+                from sam2.sam2_video_predictor import SAM2VideoPredictor
+            else:
+                raise RuntimeError("Install the official SAM 2 package to use video tracking")
         self.predictor = SAM2VideoPredictor.from_pretrained(self.model_id)
         self.predictor.to(self.device)
 

@@ -3,10 +3,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from video_annotator.config import AnnotationConfig
 from video_annotator.detector import GroundingDinoDetector

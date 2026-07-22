@@ -23,6 +23,8 @@ def _video_dir(dataset_root: Path, video: dict) -> Path:
     candidates = [
         dataset_root / "JPEGImages" / "val" / video_id,
         dataset_root / "JPEGImages" / "val" / video_id.zfill(5),
+        dataset_root / "val" / "JPEGImages" / video_id,
+        dataset_root / "val" / "JPEGImages" / video_id.zfill(5),
         dataset_root / "val" / video_id,
         dataset_root / video_id,
     ]
