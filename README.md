@@ -84,6 +84,17 @@ Prepare phrase cases:
 
 This manifest is the input for the upcoming phrase-aware video evaluator, which will compare the referred-object masks using region Jaccard (J) and boundary F metrics.
 
+## MeViS motion-expression evaluation
+
+The MeViS `Val-u` files are stored under `data\\mevis\\valid_u`. The 20-video all-expression manifest contains 377 cases. Run the COCO-RLE evaluator with:
+
+```powershell
+$env:HF_HUB_OFFLINE='1'; $env:TRANSFORMERS_OFFLINE='1'
+.\\.venv\\Scripts\\python.exe scripts\\evaluate_mevis_subset.py --manifest data\\mevis\\manifests\\20_video_all_expressions.json --output outputs\\mevis_eval --long-side 512 --chunk-frames 30
+```
+
+A one-expression smoke run passed with region Jaccard `0.8328`, boundary F `0.2169`, and recall@IoU 0.50 `0.9938`; these are diagnostic metrics, not official MeViS leaderboard results.
+
 ### Referring-video benchmark order
 
 We will use **Ref-DAVIS17 first** for a fast local phrase-segmentation test, then use **MeViS** for a larger language-guided video benchmark with motion expressions. The MeViS diagnostic target is **20 videos**. Refer-YouTube-VOS is not required because its validation data currently depends on the inaccessible legacy CodaLab download workflow.
