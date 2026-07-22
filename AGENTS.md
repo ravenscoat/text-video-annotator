@@ -8,6 +8,7 @@ Important constraints:
 
 - Continue from the documented working state; do not reinstall Python, CUDA, PyTorch, Grounding DINO, Transformers, or SAM 2.
 - The LVIS, LV-VIS, Ref-DAVIS17, and first 50 MeViS diagnostic cases are complete. The active milestone is the temporal multi-object upgrade in `TEMPORAL_MULTI_OBJECT_PLAN.md`.
+- The product goal is general natural-language selection of specific object tracks in arbitrary videos. Dog/horse/cat and numbered objects are examples only, never required input media or fixed supported classes. A prompt may select objects by category, appearance, action, position, quantity, identity, or relationship, and only matching tracks should be exported.
 - Fix the official COCO image URL handling without disabling TLS certificate verification.
 - Use the existing lightweight model adapters and keep inference within the documented 8 GB VRAM limits.
 - Run the specified acceptance checks and real evaluation before claiming completion.

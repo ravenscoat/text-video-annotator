@@ -17,6 +17,29 @@ Do not spend more GPU time on the remaining expressions until the upgraded pipel
 
 The upgraded tool must support two distinct prompt modes.
 
+### Core product intent (source of truth)
+
+This is a general-purpose object-selection system, not a dog/horse/cat application. Any named classes in this document are examples only. Do not ask the user to provide a specific example video merely because an example appears in an acceptance criterion.
+
+For an arbitrary video containing many objects, the system must:
+
+1. Discover plausible candidate objects and assign stable track IDs.
+2. Interpret a natural-language request using any available category, appearance, action, motion, position, quantity, identity, and relationship clues.
+3. Select and export only the tracks satisfying the request; all non-matching visible objects must remain unannotated.
+4. Support one selected object, several selected objects, every matching object, or no matching object.
+5. Support references to displayed track identities such as `object 1 and object 3` after candidate IDs have been exposed to the user.
+
+Illustrative requests include:
+
+```text
+the person running and the person sitting
+the two birds flying, not the bird on the ground
+the red car moving left and the bicycle near it
+object 1 and object 3
+```
+
+Action and relationship requests require evidence across multiple frames. Grounding DINO supplies open-vocabulary category candidates; it is not by itself an unrestricted action or relationship reasoner. The pipeline must build candidate tracks first and then perform temporal/referring selection.
+
 ### 1. Category union
 
 Example input:
@@ -283,9 +306,9 @@ Acceptance tests with fake detector/tracker:
 - Existing IDs survive window boundaries.
 - No requested detections produces a valid unannotated output rather than a crash.
 
-### Task 5: Category-union end-to-end acceptance
+### Task 5: Generic multi-object selection acceptance
 
-Add a small fixture video or use a locally created fixture whose objects are known. Do not commit large media.
+Use available benchmark cases or small local fixtures whose objects are known. Do not require the user to supply a particular combination of classes, and do not commit large media. Dog/horse/cat below is only one possible category-union example; equivalent unrelated categories are valid.
 
 Command:
 
@@ -295,15 +318,15 @@ video-annotator annotate --input INPUT.mp4 --target dog --target horse --output 
 
 Acceptance criteria:
 
-- At least one dog and one horse are annotated when both are visibly present and detected.
-- A visible cat is not exported.
-- Every exported object label belongs to `{dog, horse}`.
-- Multiple dogs or multiple horses have distinct stable IDs.
+- Every explicitly requested category is eligible for annotation when visibly present and detected.
+- Visible unrequested categories are not exported.
+- Every exported label belongs to the requested target set.
+- Multiple instances of the same requested category have distinct stable IDs.
 - Annotated frame count equals source frame count.
 - JSON and PNG masks agree on object IDs.
 - Peak allocated CUDA memory remains below 7.5 GB.
 
-Do not proceed to motion-expression work until this passes.
+The existing model-free dog/horse/cat test is valid evidence for filtering logic, but it is not a required semantic video or the definition of the product. Proceed to temporal/referring work once generic filtering and stable-ID orchestration pass; use Ref-DAVIS17 and MeViS for semantic end-to-end evidence.
 
 ### Task 6: Motion-expression candidate generation
 
@@ -337,6 +360,8 @@ Requirements:
    - first, last, least-visible;
    - approaching, separating;
    - touching/near.
+
+   Also parse selection clauses that combine multiple targets or behaviors, such as `the person running and the person sitting`, plus explicit displayed IDs such as `object 1 and object 3`.
 
 6. Score every candidate track against the expression. Do not discard candidates before temporal features are available.
 7. Allow multiple selected tracks for plural/multi-target expressions.
@@ -382,7 +407,7 @@ Required comparison report:
 Gate for continuing the remaining MeViS evaluation:
 
 - Region Jaccard improves by at least `+0.05` absolute, or false positives drop by at least `25%` without reducing Jaccard.
-- Category-union dog/horse/cat acceptance passes.
+- Generic requested-track selection passes: requested tracks are exported and visible non-matching tracks are excluded. No particular class combination is mandatory.
 - No regression on the existing LVIS, LV-VIS, and Ref-DAVIS smoke tests.
 
 If the gate fails, report the failure and inspect candidate-selection diagnostics. Do not hide poor results by changing the evaluation subset.
@@ -408,7 +433,7 @@ Recommended task sequence for smaller models:
 2. `Implement Task 2 only: multi-class detector postprocessing.`
 3. `Implement Task 3 only: stable TrackManager.`
 4. `Implement Task 4 only: periodic redetection orchestration.`
-5. `Execute Task 5 category-union acceptance and fix only defects within Tasks 1-4.`
+5. `Execute Task 5 generic multi-object selection acceptance and fix only defects within Tasks 1-4. Do not require a dog/horse/cat video.`
 6. `Implement Task 6 only: temporal features and MotionIntent baseline.`
 7. `Run Task 8 A/B evaluation; do not tune on different cases.`
 
@@ -427,9 +452,10 @@ Each model must update `NEXT_STEPS.md` with verified progress and the next incom
 
 This upgrade is complete only when:
 
-- `dog and horse` is represented as two explicit requested targets.
-- All detected dog and horse instances are tracked with stable IDs.
-- Unrequested cat detections are absent from masks and JSON.
+- Multiple requested categories are represented as explicit targets; `dog and horse` is only an example.
+- Requested instances are tracked with stable IDs across arbitrary supported categories.
+- Unrequested detections are absent from masks and JSON.
+- Natural-language category, appearance, action, position, quantity, identity, and relationship constraints can select a subset of candidate tracks using documented baseline capabilities.
 - Late-appearing requested objects can be added.
 - `redetect_every` controls actual detector calls.
 - Motion expressions use multi-frame candidate evidence.

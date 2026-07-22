@@ -4,7 +4,7 @@
 
 Read `TEMPORAL_MULTI_OBJECT_PLAN.md` and treat it as the active implementation plan. Pause further MeViS batches after the first 50 expression cases. Implement category-union multi-object prompts, real periodic redetection, stable IDs, and temporal track selection; then rerun the same 50 cases behind the documented A/B gate.
 
-Tasks 1-4 are complete: prompts, class-aware detector filtering, persistent multi-object IDs, and real redetection windows are implemented. The pipeline now refreshes detection at configured window boundaries and preserves global IDs through `TrackManager`; the existing 8-frame real-model smoke test passed (`objects_found=1`, 8 frames). Targeted model-free tests pass (`17 passed`). Task 5 model-free category-union checks now also pass (`11 passed` for filtering, late-object IDs, tracking, and redetection). The remaining Task 5 evidence is a real dog+horse+cat video; the local LV-VIS clips do not contain that three-class fixture, and the current OpenCV build cannot create a fresh MP4 writer, so no semantic end-to-end claim is made yet.
+Tasks 1-4 are complete: prompts, class-aware detector filtering, persistent multi-object IDs, and real redetection windows are implemented. The pipeline now refreshes detection at configured window boundaries and preserves global IDs through `TrackManager`; the existing 8-frame real-model smoke test passed (`objects_found=1`, 8 frames). Targeted model-free tests pass (`17 passed`). Generic category-union checks also pass (`11 passed` for requested-class filtering, late-object IDs, tracking, and redetection). Do not wait for or require a dog+horse+cat video: those classes were only examples. The next incomplete milestone is general temporal/referring selection, where candidate tracks are selected by natural-language category, appearance, action, position, quantity, identity, and relationships.
 
 This file is the source of truth for the next implementation steps. Read it completely before changing the project. Do not restart setup or replace the working model stack.
 
@@ -16,6 +16,8 @@ Build and verify a general-purpose, offline text-prompted annotation pipeline:
 2. SAM 2.1 Hiera Tiny converts boxes to masks and tracks masks through video.
 3. The tool writes annotated image/video output and optional mask/JSON data.
 4. Evaluation covers many object categories, not only cats and dogs.
+
+The intended interaction is not tied to any particular classes. A video may contain many objects, and a prompt may request a subset such as "the person running and the person sitting," "the red car moving left," or previously displayed object IDs such as "object 1 and object 3." The system must discover candidate objects, track them through time, evaluate the prompt against their visual and temporal properties, and export only the matching tracks. Example nouns and actions in documentation are illustrative test cases, not required user-provided videos.
 
 The immediate task is **LVIS image-subset evaluation**. After that passes, add a small video benchmark using LV-VIS or Refer-YouTube-VOS.
 
