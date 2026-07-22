@@ -67,9 +67,9 @@ def evaluate_case(case: dict, mask_dict: dict, detector, tracker, output_root: P
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(); parser.add_argument("--manifest", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--long-side", type=int, default=512); parser.add_argument("--chunk-frames", type=int, default=30); parser.add_argument("--iou-threshold", type=float, default=0.5); parser.add_argument("--device", default="cuda"); parser.add_argument("--max-cases", type=int)
+    parser = argparse.ArgumentParser(); parser.add_argument("--manifest", type=Path, required=True); parser.add_argument("--output", type=Path, required=True); parser.add_argument("--long-side", type=int, default=512); parser.add_argument("--chunk-frames", type=int, default=30); parser.add_argument("--iou-threshold", type=float, default=0.5); parser.add_argument("--device", default="cuda"); parser.add_argument("--start-case", type=int, default=0); parser.add_argument("--max-cases", type=int)
     args = parser.parse_args(); args.output.mkdir(parents=True, exist_ok=True)
-    payload = json.loads(args.manifest.read_text(encoding="utf-8")); cases = payload.get("cases", []); cases = cases[:args.max_cases] if args.max_cases else cases
+    payload = json.loads(args.manifest.read_text(encoding="utf-8")); all_cases = payload.get("cases", []); cases = all_cases[args.start_case:]; cases = cases[:args.max_cases] if args.max_cases else cases
     if not cases: raise ValueError("Manifest has no cases")
     mask_path = Path(cases[0]["mask_dict"]); mask_dict = json.loads(mask_path.read_text(encoding="utf-8"))
     detector, tracker = GroundingDinoDetector(device=args.device), Sam2VideoTracker(device=args.device); results = []
