@@ -99,6 +99,20 @@ Do not rerun the full 10-case benchmark unless evaluator code or thresholds chan
 2. **MeViS afterward** — use it as the larger language-guided video benchmark, including motion expressions.
 3. **Do not depend on Refer-YouTube-VOS** — its current validation-download workflow depends on the legacy CodaLab competition server, so it is removed from the required project roadmap.
 
+### Ref-DAVIS17 download and preparation
+
+Use the parsed Ref-DAVIS17 archive from the [SgMg Google Drive release](https://drive.google.com/file/d/1W0RsdxMK3VkNL80H1OWNmia-2asdCyYF/view?usp=sharing) when possible. The official preparation instructions are in [SgMg docs/data.md](https://github.com/bo-miao/SgMg/blob/main/docs/data.md). The alternative route is DAVIS 2017's two 480p zips plus the Ref-DAVIS text-annotation zip, followed by the SgMg conversion script.
+
+Expected validation layout:
+
+```text
+data\\ref_davis17\\valid\\JPEGImages\\<video_id>\\*.jpg
+data\\ref_davis17\\valid\\Annotations\\<video_id>\\*.png
+data\\ref_davis17\\valid\\meta_expressions.json
+```
+
+After downloading, create the ten-expression manifest with `scripts\\prepare_refdavis_manifest.py`. The next implementation task is the phrase evaluator using Grounding DINO + SAM 2 propagation and region Jaccard/boundary-F metrics.
+
 ### Refer-YouTube-VOS progress
 
 - Official dataset structure and statistics were verified from the project page.

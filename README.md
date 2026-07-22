@@ -87,3 +87,21 @@ This manifest is the input for the upcoming phrase-aware video evaluator, which 
 ### Referring-video benchmark order
 
 We will use **Ref-DAVIS17 first** for a fast local phrase-segmentation test, then use **MeViS** for a larger language-guided video benchmark with motion expressions. Refer-YouTube-VOS is not required because its validation data currently depends on the inaccessible legacy CodaLab download workflow.
+
+### Ref-DAVIS17 local setup
+
+The official Ref-DAVIS17 preparation instructions recommend the parsed archive from the [SgMg Google Drive link](https://drive.google.com/file/d/1W0RsdxMK3VkNL80H1OWNmia-2asdCyYF/view?usp=sharing). The original DAVIS route requires the two DAVIS 2017 480p zips and the Ref-DAVIS text-annotation zip, followed by the conversion script described in the [official SgMg data instructions](https://github.com/bo-miao/SgMg/blob/main/docs/data.md). Do not commit downloaded media.
+
+Place the parsed validation split at `data\\ref_davis17\\valid`:
+
+```text
+data\\ref_davis17\\valid\\JPEGImages\\<video_id>\\*.jpg
+data\\ref_davis17\\valid\\Annotations\\<video_id>\\*.png
+data\\ref_davis17\\valid\\meta_expressions.json
+```
+
+Create a deterministic ten-expression manifest:
+
+```powershell
+.\\.venv\\Scripts\\python.exe scripts\\prepare_refdavis_manifest.py --meta data\\ref_davis17\\valid\\meta_expressions.json --split-root data\\ref_davis17\\valid --output data\\ref_davis17\\manifests\\general_eval.json --max-items 10
+```
