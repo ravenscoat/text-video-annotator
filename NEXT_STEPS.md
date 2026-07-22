@@ -93,6 +93,13 @@ The remaining video milestone is to obtain the authorized LV-VIS validation arch
 
 Do not rerun the full 10-case benchmark unless evaluator code or thresholds change. The next product milestone is a referring-expression benchmark (Refer-YouTube-VOS), followed by the web API/UI layer.
 
+### Refer-YouTube-VOS progress
+
+- Official dataset structure and statistics were verified from the project page.
+- `scripts/prepare_refytvos_manifest.py` now creates phrase/object cases from local `meta_expressions.json` and `JPEGImages` files.
+- The full fast suite passes: `11 passed`.
+- Remaining work: download the authorized validation split, generate a 10-expression manifest, add the phrase evaluator with J/F metrics, inspect outputs, and push the results.
+
 ## Step 1 — Repair and Complete the LVIS Subset Download
 
 Update `scripts/download_lvis_subset.py` with these behaviors:
