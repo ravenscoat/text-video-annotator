@@ -61,3 +61,5 @@ $env:TRANSFORMERS_OFFLINE='1'
 ```
 
 It reports per-frame mask IoU, recall at IoU 0.50, false-positive/negative masks, and track fragmentation. These are diagnostic subset metrics, not official LV-VIS AP.
+
+The completed 10-case run covered 228 frames and 10 categories at long side 512 on the RTX 5060. Results: mean frame mask IoU `0.8717`, recall@IoU 0.50 `1.0000`, 232 false-positive masks, 0 false-negative masks, and 0 track fragmentation. This small diagnostic result shows strong propagation on the selected cases but also shows that open-vocabulary detection can return extra same-prompt objects; it is not official LV-VIS AP.

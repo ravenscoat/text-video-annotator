@@ -83,6 +83,16 @@ Do not repeat Steps 1–3 unless their implementation changes. LV-VIS video prep
 
 The remaining video milestone is to obtain the authorized LV-VIS validation archive locally, generate a manifest, run the real evaluator, inspect previews, and record the results. Do not download or commit the dataset automatically.
 
+### Verified LV-VIS result
+
+- The local archive is valid: 837 videos, 3,719 annotations, 1,196 categories, and 19,139 JPEG frames.
+- The official layout is `data/lv_vis/raw/val/JPEGImages/<video_id>/...`; the downloaded annotation filename is `val_instances_.json`.
+- The 10-case manifest and full evaluator completed successfully on 228 frames.
+- Aggregate metrics: mean frame mask IoU `0.8717`, recall@IoU 0.50 `1.0000`, 232 false-positive masks, 0 false-negative masks, and 0 track fragmentation.
+- The moved checkout now imports SAM 2 from the local `vendor/sam2` fallback if its old editable-install path is stale.
+
+Do not rerun the full 10-case benchmark unless evaluator code or thresholds change. The next product milestone is a referring-expression benchmark (Refer-YouTube-VOS), followed by the web API/UI layer.
+
 ## Step 1 — Repair and Complete the LVIS Subset Download
 
 Update `scripts/download_lvis_subset.py` with these behaviors:
