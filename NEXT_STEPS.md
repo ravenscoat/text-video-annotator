@@ -97,7 +97,7 @@ Do not rerun the full 10-case benchmark unless evaluator code or thresholds chan
 
 1. **Ref-DAVIS17 first** — use it as the fast local phrase-segmentation test because it is small and practical to validate locally.
 2. **MeViS afterward** — use it as the larger language-guided video benchmark, including motion expressions.
-3. Keep Refer-YouTube-VOS as an optional later benchmark because its current validation-download workflow depends on the legacy CodaLab competition server.
+3. **Do not depend on Refer-YouTube-VOS** — its current validation-download workflow depends on the legacy CodaLab competition server, so it is removed from the required project roadmap.
 
 ### Refer-YouTube-VOS progress
 
