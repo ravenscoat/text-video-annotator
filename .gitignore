@@ -8,6 +8,7 @@ data/*
 !data/.gitkeep
 checkpoints/
 vendor/
+clip-model/
 *.mp4
 *.mov
 *.avi

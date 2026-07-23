@@ -20,6 +20,12 @@ class AnnotationConfig:
     device: str = "cuda"
     keep_audio: bool = False
     targets: tuple[str, ...] | None = None
+    track_cache_path: Path | None = None
+    reuse_track_cache: bool = False
+    semantic_model_id: str | None = None
+    semantic_device: str = "cpu"
+    selector_checkpoint: Path | None = None
+    selector_threshold: float = 0.1
 
     def validate(self) -> None:
         if not self.input_path.exists():
