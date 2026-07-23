@@ -20,7 +20,7 @@ def tensorize(row, track_mean, track_std, token_mean, token_std, token_dim):
     return torch.from_numpy(tracks), torch.from_numpy(padded), torch.from_numpy(text), torch.tensor(row["labels"], dtype=torch.float32)
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--dataset",type=Path,required=True); ap.add_argument("--output",type=Path,required=True); ap.add_argument("--epochs",type=int,default=40); ap.add_argument("--device",default="cpu"); args=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--dataset",type=Path,required=True); ap.add_argument("--output",type=Path,required=True); ap.add_argument("--epochs",type=int,default=40); ap.add_argument("--device",default="cpu"); ap.add_argument("--seed",type=int,default=17); args=ap.parse_args(); np.random.seed(args.seed); torch.manual_seed(args.seed)
     rows=load_selector_rows(args.dataset); train=[r for r in rows if r.get("split")=="train"]; val=[r for r in rows if r.get("split")=="validation"]
     all_tracks=np.concatenate([np.asarray(r["features"],np.float32) for r in train]); raw_tokens=[np.asarray(token,np.float32) for r in train for seq in r["token_sequences"] for token in seq]; token_dim=max(map(len,raw_tokens)); all_tokens=np.stack([np.pad(token,(0,token_dim-len(token))) for token in raw_tokens],axis=0)
     tmean,tstd=all_tracks.mean(0),all_tracks.std(0)+1e-6; kmean,kstd=all_tokens.mean(0),all_tokens.std(0)+1e-6
@@ -43,6 +43,12 @@ def main():
     tp=fp=fn=0
     for r in results:
         for y,p in zip(r["labels"],r["predictions"]): tp+=y and p; fp+=(not y) and p; fn+=y and (not p)
-    report={"train_samples":len(train),"validation_samples":len(val),"epochs":args.epochs,"device":args.device,"threshold":float(threshold),"precision":tp/max(1,tp+fp),"recall":tp/max(1,tp+fn),"results":results}
+    sweep=[]
+    for q in (.1,.2,.3,.4,.5,.6,.7,.8,.9):
+        stp=sfp=sfn=0
+        for row in results:
+            for y,s in zip(row["labels"],row["scores"]): stp+=int(y and s>=q); sfp+=int((not y) and s>=q); sfn+=int(y and s<q)
+        sweep.append({"threshold":q,"precision":stp/max(1,stp+sfp),"recall":stp/max(1,stp+sfn)})
+    report={"train_samples":len(train),"validation_samples":len(val),"epochs":args.epochs,"seed":args.seed,"device":args.device,"threshold":float(threshold),"precision":tp/max(1,tp+fp),"recall":tp/max(1,tp+fn),"threshold_sweep":sweep,"results":results}
     args.output.parent.mkdir(parents=True,exist_ok=True); torch.save({"model":model.state_dict(),"track_mean":tmean,"track_std":tstd,"token_mean":kmean,"token_std":kstd},args.output.with_suffix(".pt")); args.output.write_text(json.dumps(report,indent=2),encoding="utf-8"); print(json.dumps(report,indent=2))
 if __name__=="__main__": main()
